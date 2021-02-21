@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Budget Helper</string><!-- can change this up-->
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Budget</string><!--can change this to something else-->
+    <string name="title_notifications">Calendar</string>
+    <string name="overview">Overview</string>
+    <string name="introduction">Help us to help you save money </string>
+    <string name="createBudget">Add Budget</string><!-- can have multiple budgets perhaps? or just have a single budget screen-->
+    <string name="manageBudget">Manage Budgets</string>
+    <string name="overviewDescription">Have something here about the daily bills/maybe what you have left of your budget for the month?</string>
+    <string name="overviewWhatToDo">Maybe have a button in here to update the daily schedule once bills have been paid? Example: Get notified of internet bill, pay bill via banking app, but it will still show up on our app given we arent asking for that kind of info, so check of it has been paid with a click?</string>
+    <string name="gettingStarted">To get started with building a budget we must begin with your monthly income</string>
+    <string name="introBtn">Click here for quick guide</string>
+    <string name="whatDo"></string><!-- add something in here for getting started with your budget-->
+    <string name="back2Managing">Go back</string>
+    <string name="addToList">Use the below buttons to manage the current items in your budget</string>
+</resources>
