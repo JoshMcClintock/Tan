@@ -2,8 +2,8 @@ package mobiledev.unb.ca.project;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.method.DigitsKeyListener;
@@ -15,13 +15,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.File;
-import java.io.FileWriter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
+
 import java.io.IOException;
 import java.util.ArrayList;
+
+import mobiledev.unb.ca.project.util.JsonUtil;
 
 public class ItemCreation extends AppCompatActivity {
 
@@ -29,10 +35,11 @@ public class ItemCreation extends AppCompatActivity {
     private ArrayList editText = new ArrayList();
     private TextView result;
     private static final String TAG = "item_creation";
-    private String userInput = "";
+    private JSONArray jarray;
     private AlertDialog alertDialog;
     private String date;
-    private String file_path;
+
+    private JsonUtil jsonUtil;
 
     InputFilter filter = new InputFilter() {
         @Override
@@ -90,20 +97,41 @@ public class ItemCreation extends AppCompatActivity {
 
         alert.setPositiveButton("YES",
                 new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
                     public void onClick(DialogInterface dialog,
                                         int which) {
                         Intent getDate = getIntent();
                         date = getDate.getStringExtra("date");
 
-                        Log.i(TAG, "length " + input.getText().toString().length() + " " + input2.getText().toString().length());
-
                         if(input.getText().toString().length() > 0 && input2.getText().toString().length() > 0) {
-                            userInput += date + ": " + input.getText().toString() + " (Price: " + input2.getText().toString() + ")";
+                            JSONObject userInput = new JSONObject();
+                            try {
+                                if(MainActivity.old_userInput != null && MainActivity.emptyItemList) {
+                                    jarray = new JSONObject(MainActivity.old_userInput).getJSONArray("Items");
+                                }
+                                else{
+                                    jarray = new JSONArray();
+                                }
+                                userInput.put("date",date);
+                                userInput.put("Item", input.getText().toString());
+                                userInput.put("Price", input2.getText().toString());
+                                jarray.put(userInput);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
 
-                            saveToFile();
+                            JSONObject groceryItemsList = new JSONObject();
+                            try {
+                                jarray = JsonUtil.ModifyElements(jarray);
+                                groceryItemsList.put("Items", jarray);
+                            } catch (JSONException | IOException e) {
+                                e.printStackTrace();
+                            }
+                            jsonUtil = new JsonUtil(MainActivity.old_userInput, groceryItemsList);
 
                             Intent refresh = new Intent(ItemCreation.this, MainActivity.class);
-                            refresh.putExtra("file_path", file_path);
+                            refresh.putExtra("file_path", jsonUtil.createJsonFile());
+                            MainActivity.emptyItemList = true;
                             startActivity(refresh);
                         }
                         else{
@@ -122,33 +150,6 @@ public class ItemCreation extends AppCompatActivity {
         });
         alertDialog = alert.create();
         alertDialog.show();
-    }
-
-    private void saveToFile(){
-        File root = Environment.getExternalStorageDirectory();
-        Log.i(TAG, root.getAbsolutePath());
-
-        if(!root.exists())
-            root.mkdirs();
-
-        File gpxfile = new File(root, "userInput.txt");
-        file_path = gpxfile.getAbsolutePath();
-
-        Log.i(TAG, userInput);
-        String old_userInput = MainActivity.old_userInput;
-        Log.i(TAG, "old user input" + old_userInput);
-
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(gpxfile);
-            if(old_userInput != null)
-                writer.append(old_userInput);
-            writer.append(userInput);
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
-        }
     }
 
 }
